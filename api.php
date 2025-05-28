@@ -126,6 +126,7 @@ add_action( 'rest_api_init', function () {
 } );
 // funcion para obtener datos para la UI
 function crm_whatsapp_bot_get_data( WP_REST_Request $request ) {
+    global $wp_roles;
     $type = $request->get_param( 'type' );
 
     if ( $type === 'get_chats' ) {
@@ -165,11 +166,13 @@ function crm_whatsapp_bot_get_data( WP_REST_Request $request ) {
                 'picture' => $avatar_url[0] ?? '',
                 'instance' => get_user_meta( $user->ID, 'crm_instance', true ) ?? '',
                 'registered' => $user->user_registered,
+                'role' => $user->roles[0],
+                'crm_etiqueta' => get_user_meta( $user->ID, 'crm_etiqueta', true ) ?? '',
                 'crm_last_message' => get_user_meta( $user->ID, 'crm_last_message', true ) ?? '',
-                'crm_last_message_timestamp' => get_user_meta( $user->ID, 'crm_last_message_timestamp', true ) ?? '',
+                'crm_last_message_timestamp' => get_user_meta( $user->ID, 'crm_last_message_timestamp', true ) ?? ''
+
             );
         }
-
         return $chat_data;
     } elseif ( $type === 'get_history' ) {
         $user_id = $request->get_param( 'user_id' );
@@ -211,6 +214,114 @@ function crm_whatsapp_bot_get_data( WP_REST_Request $request ) {
         }
 
         return $history_data;
+    } elseif ( $type === 'get_user' ) {
+        $user_id = $request->get_param( 'user_id' );
+        $user = get_userdata( $user_id );
+
+        if ( $user ) {
+            $avatar_id = get_user_meta( $user->ID, 'wp_user_avatar', true );
+            $avatar_url = wp_get_attachment_image_src( $avatar_id, 'thumbnail' );
+
+            $user_data = array(
+                'id' => $user->ID,
+                'email' => $user->user_email,
+                'login' => $user->user_login,
+                'name' => $user->display_name ?? '',
+                'billing_phone' => get_user_meta( $user->ID, 'billing_phone', true ) ?? '',
+                'picture' => $avatar_url[0] ?? '',
+                'instance' => get_user_meta( $user->ID, 'crm_instance', true ) ?? '',
+                'registered' => $user->user_registered,
+                'role' => $user->roles[0],
+                'crm_last_message' => get_user_meta( $user->ID, 'crm_last_message', true ) ?? '',
+                'crm_last_message_timestamp' => get_user_meta( $user->ID, 'crm_last_message_timestamp', true ) ?? '',
+                'crm_etiqueta' => get_user_meta( $user->ID, 'crm_etiqueta', true ) ?? '', // Agregar la etiqueta
+            );
+
+            // etiquetas
+            $etiquetas = get_option( 'crm_whatsapp_bot_etiquetas', array() );
+            $user_data['etiquetas'] = $etiquetas;
+
+            // roles
+            $roles = array();
+            foreach ( $wp_roles->roles as $key => $value ) {
+                $roles[] = array(
+                    'id' => $key,
+                    'name' => $value['name']
+                );
+            }
+            $user_data['roles'] = $roles;
+
+            // Obtener las instancias de la API de Evolution
+            $server_url = get_option( 'evolution_api_url' );
+            $api_key = get_option( 'evolution_api_key' );
+
+            $args = array(
+                'method'  => 'GET',
+                'headers' => array(
+                    'Content-Type' => 'application/json',
+                    'apikey' => $api_key,
+                ),
+                'timeout' => 30,
+            );
+
+            $response = wp_remote_request( trailingslashit( $server_url ) . "instance/fetchInstances", $args );
+
+            if ( is_wp_error( $response ) ) {
+                $error_message = $response->get_error_message();
+                error_log( 'Error al obtener las instancias de la API de Evolution: ' . $error_message );
+                $instances = array();
+            } else {
+                $response_code = wp_remote_retrieve_response_code( $response );
+                $response_body = wp_remote_retrieve_body( $response );
+
+                if ( $response_code === 200 ) {
+                    $instances_data = json_decode( $response_body, true );
+                    $instances = array();
+                    foreach ( $instances_data as $instance_data ) {
+                        $instances[] = $instance_data['instance']['instanceName'];
+                    }
+                } else {
+                    error_log( 'Error al obtener las instancias de la API de Evolution: ' . $response_body );
+                    $instances = array();
+                }
+            }
+            $user_data['instances'] = $instances;
+
+
+            return $user_data;
+        }
+    } elseif ( $type === 'update_user' ) {
+        $user_id = $request->get_param( 'user_id' );
+        $name = $request->get_param( 'name' );
+        $email = $request->get_param( 'email' );
+        $billing_phone = $request->get_param( 'billing_phone' );
+        $role = $request->get_param( 'role' );
+        $crm_etiqueta = $request->get_param( 'crm_etiqueta' );
+        $instance = $request->get_param( 'instance' );
+
+        if ( empty( $user_id ) ) {
+            return new WP_Error( 'missing_data', 'Falta el ID del usuario.', array( 'status' => 400 ) );
+        }
+
+        $user_data = array(
+            'ID' => $user_id,
+            'display_name' => sanitize_text_field( $name ),
+            'user_email' => sanitize_email( $email )
+        );
+
+        $user_id = wp_update_user( $user_data );
+
+        if ( is_wp_error( $user_id ) ) {
+            return $user_id;
+        }
+
+        update_user_meta( $user_id, 'billing_phone', sanitize_text_field( $billing_phone ) );
+        wp_update_user( array( 'ID' => $user_id, 'role' => sanitize_text_field( $role ) ) );
+        update_user_meta( $user_id, 'crm_etiqueta', sanitize_text_field( $crm_etiqueta ) );
+        update_user_meta( $user_id, 'crm_instance', sanitize_text_field( $instance ) );
+
+        return array( 'message' => 'Datos del usuario actualizados correctamente.' );
+ 
     } else {
         return array( 'message' => 'Invalid data type' );
     }
@@ -370,6 +481,8 @@ function crm_whatsapp_bot_get_profile_data( $instance_name, $phone_number, $last
             update_user_meta( $user_id, 'crm_instance', $instance_name );
             update_user_meta( $user_id, 'crm_last_message', $last_message );
             update_user_meta( $user_id, 'crm_last_message_timestamp', time() );
+            update_user_meta( $user_id, 'crm_etiqueta', $etiquetas[0]['nombre'] );
+            ;
             // Guardar el avatar del usuario
             $avatar_url = $decoded_body['picture'];
             if ( ! empty( $avatar_url ) ) {

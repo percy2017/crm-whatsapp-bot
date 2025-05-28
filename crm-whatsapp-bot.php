@@ -9,15 +9,14 @@
 // Función para encolar los estilos CSS y el JavaScript
 function crm_whatsapp_bot_enqueue_scripts( $hook ) {
     // Solo encolar los scripts y estilos en la página del plugin
-    if ( 'toplevel_page_crm-whatsapp-bot' != $hook ) {
+    if ( 'toplevel_page_crm-whatsapp-bot' != $hook) {
         return;
     }
 
     wp_enqueue_media();
-    
+    add_thickbox();
+
     wp_enqueue_style( 'crm-css', plugin_dir_url( __FILE__ ) . 'css/crm.css' );
-    wp_enqueue_style( 'intl-tel-input-css', 'https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.1/build/css/intlTelInput.css' );
-    wp_enqueue_script( 'intl-tel-input-js', 'https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.1/build/js/intlTelInput.min.js', array( 'jquery' ), '25.3.1', true );
     wp_enqueue_script( 'crm-js', plugin_dir_url( __FILE__ ) . 'js/crm.js', array( 'jquery', 'intl-tel-input-js' ), '1.0', true );
     wp_enqueue_script( 'socket-js', plugin_dir_url( __FILE__ ) . 'js/socket.js', array( 'jquery', 'socket-io' ), '1.0', true );
     wp_enqueue_script( 'socket-io', esc_url( get_option( 'socket_io_url' ) ) . '/socket.io/socket.io.js', array('jquery'), '4.8.1', true );
@@ -29,6 +28,10 @@ function crm_whatsapp_bot_enqueue_scripts( $hook ) {
     // SweetAlert
     wp_enqueue_style( 'sweetalert2', 'https://cdn.jsdelivr.net/npm/sweetalert2@11.0.18/dist/sweetalert2.min.css', array(), '11.0.18' );
     wp_enqueue_script( 'sweetalert2', 'https://cdn.jsdelivr.net/npm/sweetalert2@11.0.18/dist/sweetalert2.min.js', array( 'jquery' ), '11.0.18', true );
+
+    // intl-tel-input
+    wp_enqueue_style( 'intl-tel-input-css', 'https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.1/build/css/intlTelInput.css' );
+    wp_enqueue_script( 'intl-tel-input-js', 'https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.1/build/js/intlTelInput.min.js', array( 'jquery' ), '25.3.1', true );
 }
 add_action( 'admin_enqueue_scripts', 'crm_whatsapp_bot_enqueue_scripts' );
 

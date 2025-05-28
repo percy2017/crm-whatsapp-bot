@@ -16,6 +16,8 @@ add_action( 'admin_menu', 'crm_whatsapp_bot_admin_menu' );
 
 // Función para renderizar la UI del plugin
 function crm_whatsapp_bot_render_ui() {
+    $emojis_json = file_get_contents(plugin_dir_path( __FILE__ ) . 'emojis.json');
+    $emojis = json_decode( $emojis_json, true );
     ?>
     <div class="crm-whatsapp-bot">
         <div class="crm-whatsapp-bot__sidebar crm-whatsapp-bot__sidebar--left">
@@ -49,9 +51,10 @@ function crm_whatsapp_bot_render_ui() {
                 <div class="crm-whatsapp-bot__chat-footer">
                     <div class="send_tools">
                         <button class="send_tools_attach" type="button">...</button>
-                        <button class="send_tools_emojis" type="button">...</button>
+                        <button class="thickbox send_tools_emojis" type="button">...</button>
                         <button class="send_tools_quick" type="button">...</button>
                     </div>
+                   
                     <textarea placeholder="Escribe un mensaje" class="crm-whatsapp-bot__chat-input"></textarea>
                     <button class="crm-whatsapp-bot__chat-send">Enviar</button>
                 </div>
@@ -62,8 +65,47 @@ function crm_whatsapp_bot_render_ui() {
             <div class="crm-whatsapp-bot__chat-header">
                 <h2>Info de Contacto</h2>
             </div>
-            Datos del chat y contacto
+            <div class="crm-whatsapp-bot__chat-data-item">
+                <label>Nombre:</label>
+                <input type="text" class="crm-whatsapp-bot__chat-data-name">
+            </div>
+            <div class="crm-whatsapp-bot__chat-data-item">
+                <label>Email:</label>
+                <input type="text" class="crm-whatsapp-bot__chat-data-email">
+            </div>
+            <div class="crm-whatsapp-bot__chat-data-item">
+                <label>Teléfono:</label>
+                <input type="text" class="crm-whatsapp-bot__chat-data-phone">
+            </div>
+            <hr>
+            <div class="crm-whatsapp-bot__chat-data-item">
+                <label>Rol:</label>
+                <select class="crm-whatsapp-bot__chat-data-role"></select>
+            </div>
+            <div class="crm-whatsapp-bot__chat-data-item">
+                <label>Etiquetas:</label>
+                <select class="crm-whatsapp-bot__chat-data-etiqueta"></select>
+            </div>
+            <div class="crm-whatsapp-bot__chat-data-item">
+                <label>Intancia:</label>
+                <select class="crm-whatsapp-bot__chat-data-instance"></select>
+            </div>
+            <hr>
+             <div class="crm-whatsapp-bot__chat-data-item">
+                <button class="crm-whatsapp-bot__chat-data-save">Guardar</button>
+            </div>
         </div>
+    </div>
+    
+    <div id="crm-whatsapp-bot-emoji-modal" style="display:none; display: flex; flex-wrap: wrap; width: 500px; height: 300px; overflow: auto; padding: 10px;">
+        <input type="text" id="emoji-search" placeholder="Buscar emoji" style="width: 100%; margin-bottom: 10px;">
+        <?php
+        foreach ( $emojis as $category => $emoji_list ) {
+            foreach ( $emoji_list as $emoji ) {
+                echo '<button class="crm-whatsapp-bot-emoji-button" data-emoji="' . $emoji['emoji'] . '" data-name="' . $emoji['name'] . '" style="font-size: 20px; border: none; background: none; cursor: pointer; margin: 5px;" onclick="addEmojiToTextarea(\'' . $emoji['emoji'] . '\'); tb_remove();">' . $emoji['emoji'] . '</button>';
+            }
+        }
+        ?>
     </div>
     <?php
 }

@@ -1,11 +1,12 @@
 jQuery(document).ready(function($) {
+    let mediaId = null; // Declarar la variable global mediaId aquí
     // Function to load chats
-   function loadChats() {
+    function loadChats() {
         $.ajax({
             url: '/wp-json/crm-whatsapp-bot/v1/get_data?type=get_chats',
             method: 'GET',
             success: function(data) {
-                console.log(data)
+                // console.log(data)
                 let chatListHtml = '';
                 data.forEach(chat => {
                     chatListHtml += `
@@ -83,13 +84,13 @@ jQuery(document).ready(function($) {
 
     // New chat button click handler
     $('.crm-whatsapp-bot__sidebar-header').on('click', '.crm-whatsapp-bot__new-chat-button', function() {
+        console.log('crm-whatsapp-bot__new-chat-button')
         $('.crm-whatsapp-bot__new-chat').toggle();
         $('.crm-whatsapp-bot__sidebar-chats').toggle();
-        
     });
 
      // Media library button click handler
-    $(document).on('click', '.crm-whatsapp-bot__chat-attach-button', function(e) {
+    $(document).on('click', '.send_tools_attach', function(e) {
         e.preventDefault();
 
         // Open media library
@@ -103,8 +104,8 @@ jQuery(document).ready(function($) {
             });
             mediaUploader.on('select', function() {
                 const attachment = mediaUploader.state().get('selection').first().toJSON();
-                const mediaId = attachment.id;
-                console.log(mediaId);
+                mediaId = attachment.id;
+                mediaId = mediaId;
             });
 
             mediaUploader.open();
@@ -115,6 +116,30 @@ jQuery(document).ready(function($) {
                 text: 'La Media Library no está disponible.',
             });
         }
+    });
+
+   // Emoji button click handler
+    $(document).on('click', '.send_tools_emojis', function() {
+        tb_show('Emojis', '#TB_inline?inlineId=crm-whatsapp-bot-emoji-modal', true);
+    });
+
+    $(document).on('click', '.crm-whatsapp-bot-emoji-button', function() {
+        var emoji = $(this).data('emoji');
+        $('.crm-whatsapp-bot__chat-input').val($('.crm-whatsapp-bot__chat-input').val() + emoji);
+        tb_remove();
+    });
+
+    // Function to filter emojis
+    $('#emoji-search').on('keyup', function() {
+        var searchTerm = $(this).val().toLowerCase();
+        $('.crm-whatsapp-bot-emoji-button').each(function() {
+            var emojiName = $(this).data('name').toLowerCase();
+            if (emojiName.indexOf(searchTerm) > -1) {
+                $(this).show();
+            } else {
+                $(this).hide();
+            }
+        });
     });
 
     // Initialize intl-tel-input
@@ -142,55 +167,7 @@ jQuery(document).ready(function($) {
     // Listen for the custom event 'crm_new_message'
     $(document).on('crm_new_message', function(event, data) {
         console.log('[CRM] Received crm_new_message event:', data);
-
-        // Find the chat in the sidebar
-        let $chat = $('.crm-whatsapp-bot__sidebar-chats ul li[data-remotejid="' + sender + '"]');
-
-        // If the chat doesn't exist, create it
-        if ($chat.length === 0) {
-            const chatHtml = `
-                <li data-user-id="${profile.id}" data-remotejid="${sender}">
-                    <div class="crm-whatsapp-bot__chat">
-                        <div class="crm-whatsapp-bot__chat-avatar">
-                            <img src="${profile.picture}" alt="Avatar">
-                        </div>
-                        <div class="crm-whatsapp-bot__chat-info">
-                            <div class="crm-whatsapp-bot__chat-name">${profile.name}</div>
-                            <div class="crm-whatsapp-bot__chat-last-message">${message}</div>
-                            <div class="crm-whatsapp-bot__chat-instance">${instance}</div>
-                        </div>
-                    </div>
-                </li>
-            `;
-            $('.crm-whatsapp-bot__sidebar-chats ul').append(chatHtml);
-            $chat = $('.crm-whatsapp-bot__sidebar-chats ul li[data-remotejid="' + sender + '"]');
-        } else {
-            // Update the existing chat
-            $chat.find('.crm-whatsapp-bot__chat-name').text(profile.name);
-            $chat.find('.crm-whatsapp-bot__chat-last-message').text(message);
-            $chat.find('.crm-whatsapp-bot__chat-instance').text(instance);
-            $chat.find('.crm-whatsapp-bot__chat-avatar img').attr('src', profile.picture);
-        }
-
-        // Update the chat header
-        $('.crm-whatsapp-bot__chat-header .crm-whatsapp-bot__chat-name').text(profile.name);
-        $('.crm-whatsapp-bot__chat-header .crm-whatsapp-bot__chat-avatar img').attr('src', profile.picture);
-
-        // Create a new message element
-        let messageHtml = '';
-        if (tipo_contenido === 'image') {
-            messageHtml = `<img src="${media_url}" alt="Image" class="crm-whatsapp-bot__message-media">`;
-        } else if (tipo_contenido === 'video') {
-            messageHtml = `<video src="${media_url}" controls class="crm-whatsapp-bot__message-media"></video>`;
-        } else if (tipo_contenido === 'audio') {
-            messageHtml = `<audio src="${media_url}" controls class="crm-whatsapp-bot__message-media"></audio>`;
-        } else {
-            const messageClass = (tipo_mensaje === 'input') ? 'crm-whatsapp-bot__message--received' : 'crm-whatsapp-bot__message--sent';
-            messageHtml = `<div class="crm-whatsapp-bot__message ${messageClass}">${message}</div>`;
-        }
-
-        // Append the message to the chat body
-        $('.crm-whatsapp-bot__chat-body').append(messageHtml);
+        loadChats()
     });
 
     // Handle click event on chat list items
@@ -202,7 +179,6 @@ jQuery(document).ready(function($) {
         console.log('[CRM] Clicked on chat with userId:', userId);
 
         // Update chat header
-
         $('.crm-whatsapp-bot__chat-header .crm-whatsapp-bot__chat-name').text(userName);
         $('.crm-whatsapp-bot__chat-header .crm-whatsapp-bot__chat-avatar img').attr('src', userPicture);
 
@@ -211,7 +187,9 @@ jQuery(document).ready(function($) {
 
         // Load chat history
         loadChatHistory(userId);
-        $('.crm-whatsapp-bot__chat-data').hide();
+        $('.crm-whatsapp-bot__chat-data').hide()
+        mediaId = null
+        $('.crm-whatsapp-bot__chat-input').val('')
     });
 
     // Load chats on document ready
@@ -220,7 +198,89 @@ jQuery(document).ready(function($) {
     // Event listener for chat header click
     $('.crm-whatsapp-bot__chat-header').on('click', function() {
         $('.crm-whatsapp-bot__chat-data').show();
+
+        let userId = $('.crm-whatsapp-bot__chat-list li.active').data('user-id');
+
+        $.ajax({
+            url: `/wp-json/crm-whatsapp-bot/v1/get_data?type=get_user&user_id=${userId}`,
+            method: 'GET',
+            success: function(data) {
+                // Insertar la información del contacto en el sidebar derecho
+                $('.crm-whatsapp-bot__chat-data .crm-whatsapp-bot__chat-data-name').val(data.name);
+                $('.crm-whatsapp-bot__chat-data .crm-whatsapp-bot__chat-data-email').val(data.email);
+                $('.crm-whatsapp-bot__chat-data .crm-whatsapp-bot__chat-data-phone').val(data.billing_phone);
+
+                // Cargar los roles al select
+                let rolesHtml = '';
+                data.roles.forEach(role => {
+                    rolesHtml += `<option value="${role.id}" ${data.role === role.id ? 'selected' : ''}>${role.name}</option>`;
+                });
+                $('.crm-whatsapp-bot__chat-data .crm-whatsapp-bot__chat-data-role').html(rolesHtml);
+
+                // Cargar las etiquetas al select
+                let etiquetasHtml = '';
+                data.etiquetas.forEach(etiqueta => {
+                    etiquetasHtml += `<option value="${etiqueta.nombre}" ${data.crm_etiqueta === etiqueta.nombre ? 'selected' : ''}>${etiqueta.nombre}</option>`;
+                });
+                $('.crm-whatsapp-bot__chat-data .crm-whatsapp-bot__chat-data-etiqueta').html(etiquetasHtml);
+
+                // Cargar las instancias al select
+                let instancesHtml = '';
+                data.instances.forEach(instance => {
+                    instancesHtml += `<option value="${instance}" ${data.instance === instance ? 'selected' : ''}>${instance}</option>`;
+                });
+                $('.crm-whatsapp-bot__chat-data .crm-whatsapp-bot__chat-data-instance').html(instancesHtml);
+            },
+            error: function(error) {
+                console.error('[CRM] Error loading user data:', error);
+            }
+        });
     });
+
+    $('.crm-whatsapp-bot__chat-data-save').on('click', function() {
+            // Event listener for save button click
+        let userId = $('.crm-whatsapp-bot__chat-list li.active').data('user-id');
+        let name = $('.crm-whatsapp-bot__chat-data .crm-whatsapp-bot__chat-data-name').val();
+        let email = $('.crm-whatsapp-bot__chat-data .crm-whatsapp-bot__chat-data-email').val();
+        let billing_phone = $('.crm-whatsapp-bot__chat-data .crm-whatsapp-bot__chat-data-phone').val();
+        let role = $('.crm-whatsapp-bot__chat-data .crm-whatsapp-bot__chat-data-role').val();
+        let crm_etiqueta = $('.crm-whatsapp-bot__chat-data .crm-whatsapp-bot__chat-data-etiqueta').val();
+        let instance = $('.crm-whatsapp-bot__chat-data .crm-whatsapp-bot__chat-data-instance').val();
+        console.log(instance)
+        $.ajax({
+            url: `/wp-json/crm-whatsapp-bot/v1/get_data?type=update_user`,
+            method: 'GET',
+            data: {
+                user_id: userId,
+                name: name,
+                email: email,
+                billing_phone: billing_phone,
+                role: role,
+                crm_etiqueta: crm_etiqueta,
+                instance: instance
+            },
+            success: function(response) {
+                console.log('[CRM] User data updated successfully:', response);
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Éxito',
+                    text: 'Datos del usuario actualizados correctamente.',
+                });
+                loadChats()
+            },
+            error: function(error) {
+                console.error('[CRM] Error updating user data:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Error al actualizar los datos del usuario.',
+                });
+            }
+        });
+
+
+    });
+    
 
     // Event listener for ESC key
     $(document).keydown(function(e) {
@@ -252,18 +312,10 @@ jQuery(document).ready(function($) {
    });
 
    function sendMessage() {
-       const messageText = $('.crm-whatsapp-bot__chat-input').val();
-       const userId = $('.crm-whatsapp-bot__chat-list li.active').data('user-id');
-
-       if (!messageText) {
-           Swal.fire({
-               icon: 'error',
-               title: 'Mensaje vacío',
-               text: 'Por favor, escribe un mensaje antes de enviar.',
-           });
-           return;
-       }
-
+        const messageText = $('.crm-whatsapp-bot__chat-input').val();
+        const userId = $('.crm-whatsapp-bot__chat-list li.active').data('user-id');
+        const instance = $('.crm-whatsapp-bot__chat-list li.active').find('.crm-whatsapp-bot__chat-instance').text();
+        
        if (!userId) {
            Swal.fire({
                icon: 'error',
@@ -274,10 +326,14 @@ jQuery(document).ready(function($) {
            return;
        }
 
-       const messageData = {
-           message: messageText,
-           user_id: userId
-       };
+        const messageData = {
+            message: messageText,
+            user_id: userId,
+            instance: instance,
+            media_id: mediaId
+        };
+        console.log(messageData)
+        $('.crm-whatsapp-bot__chat-send').prop('disabled', true);
 
        $.ajax({
            url: '/wp-json/crm-whatsapp-bot/v1/send_message',
@@ -285,21 +341,17 @@ jQuery(document).ready(function($) {
            contentType: 'application/json',
            data: JSON.stringify(messageData),
            success: function(response) {
-               console.log('[CRM] Message sent successfully:', response);
+                console.log('[CRM] Message sent successfully:', response);
 
-               // Update chat display
-               const messageHtml = `<div class="crm-whatsapp-bot__message crm-whatsapp-bot__message--sent">${messageText}</div>`;
-               $('.crm-whatsapp-bot__chat-body').append(messageHtml);
+                // Update chat display
+                const messageHtml = `<div class="crm-whatsapp-bot__message crm-whatsapp-bot__message--sent">${messageText}</div>`;
+                $('.crm-whatsapp-bot__chat-body').append(messageHtml);
 
                // Clear input
-               $('.crm-whatsapp-bot__chat-input').val('');
-
-               Swal.fire({
-                   icon: 'success',
-                   title: 'Mensaje enviado',
-                   showConfirmButton: false,
-                   timer: 1500
-               });
+                $('.crm-whatsapp-bot__chat-input').val('');
+                mediaId = null
+                $('.crm-whatsapp-bot__chat-send').prop('disabled', false);
+               loadChats();
            },
            error: function(error) {
                console.error('[CRM] Error sending message:', error);
@@ -308,6 +360,7 @@ jQuery(document).ready(function($) {
                    title: 'Error al enviar el mensaje',
                    text: error.responseJSON.message,
                });
+               $('.crm-whatsapp-bot__chat-send').prop('disabled', false);
            }
        });
    }

@@ -312,3 +312,26 @@ body {
 .crm-whatsapp-bot__new-chat-start:hover {
     background-color: #0056b3;
 }
+
+.crm-whatsapp-bot__chat-data {
+    padding: 10px;
+}
+
+.crm-whatsapp-bot__chat-data-item {
+    margin-bottom: 10px;
+}
+
+.crm-whatsapp-bot__chat-data-item label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.crm-whatsapp-bot__chat-data-item input,
+.crm-whatsapp-bot__chat-data-item select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+    box-sizing: border-box;
+}

@@ -32,7 +32,7 @@ jQuery(document).ready(function($) {
             console.log('[CRM] Received new_server_data:', data);
 
             // Dispatch a custom event with the data
-            // $(document).trigger('crm_new_message', data);
+            $(document).trigger('crm_new_message', data);
         });
 
         socket.on('connect_error', (error) => {
