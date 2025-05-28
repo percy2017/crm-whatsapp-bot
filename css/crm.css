@@ -1,0 +1,314 @@
+body {
+  overflow-y: hidden;
+}
+
+
+/* Estilos generales para el contenedor principal */
+.crm-whatsapp-bot {
+    margin-top: 20px;
+    display: flex;
+    height: 90vh; /* Asegura que ocupe toda la altura de la pantalla */
+    /* overflow: hidden; */
+}
+
+/* Estilos para los sidebars */
+.crm-whatsapp-bot__sidebar {
+    width: 250px; /* Ancho del sidebar */
+    flex-shrink: 0; /* Evita que se encoja */
+    /* background-color: #f0f2f5; /* Fondo similar a WhatsApp Web */
+    border: 1px solid #e0e0e0;
+}
+
+/* Estilos para el sidebar izquierdo */
+.crm-whatsapp-bot__sidebar--left {
+    display: flex;
+    flex-direction: column;
+}
+
+.crm-whatsapp-bot__chat-instance {
+    background-color: #f0f2f5; /* Color de fondo */
+    color: #007bff; /* Color de texto */
+    font-size: 12px; /* Tamaño de fuente */
+    font-weight: bold; /* Negrita */
+}
+
+
+.crm-whatsapp-bot__sidebar-header {
+    padding: 15px;
+    border: 1px solid #e0e0e0;
+}
+
+.crm-whatsapp-bot__sidebar-search {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #e0e0e0;
+    border-radius: 20px;
+    box-sizing: border-box;
+}
+
+.crm-whatsapp-bot__sidebar-chats {
+    flex-grow: 1;
+    overflow-y: auto;
+    height: calc(100vh - 200px); /* Ajustar la altura */
+}
+
+.crm-whatsapp-bot__chat-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.crm-whatsapp-bot__chat-list li {
+    padding: 8px;
+    border-bottom: 1px solid #e0e0e0;
+    cursor: pointer;
+    display: flex;
+    /* align-items: center; */
+}
+
+.crm-whatsapp-bot__chat-list li:hover {
+    background-color: #f5f5f5;
+}
+
+.crm-whatsapp-bot__chat {
+    display: flex;
+    /* align-items: center; */
+}
+
+.crm-whatsapp-bot__chat-avatar img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+    vertical-align: middle;
+}
+
+.crm-whatsapp-bot__chat-info {
+    flex-grow: 1;
+    /* display: flex; */
+    /* flex-direction: column; */
+    justify-content: left;
+}
+
+.crm-whatsapp-bot__chat-name {
+    font-weight: bold;
+    font-size: 14px;
+    color: #111b21;
+}
+
+.crm-whatsapp-bot__chat-last-message {
+    color: #54656f;
+    font-size: 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Estilos para el sidebar derecho */
+.crm-whatsapp-bot__sidebar--right {
+    border-left: 1px solid #e0e0e0;
+    display: none; /* Ocultar por defecto */
+}
+
+/* Estilos para el área de contenido del chat */
+.crm-whatsapp-bot__chat-content {
+    flex-grow: 1; /* Ocupa el espacio restante */
+    display: flex;
+    flex-direction: column;
+}
+
+/* Estilos para el chat */
+.crm-whatsapp-bot__chat {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+/* Estilos para el header del chat */
+.crm-whatsapp-bot__chat-header {
+    height: 40px; /* Altura del header */
+    /* flex-shrink: 0; Evita que se encoja */
+    background-color: #f0f2f5;
+    border: 1px solid #e0e0e0;
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    /* justify-content: flex-start; */
+    /* display: none; */
+}
+
+/* Estilos para el body del chat */
+.crm-whatsapp-bot__chat-body {
+    flex-grow: 1; /* Ocupa el espacio restante */
+    overflow-y: auto; /* Agrega scroll si el contenido es demasiado largo */
+    padding: 10px;
+    background-color: #E5DDD5; /* Fondo similar a WhatsApp Web */
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+/* Estilos para los mensajes */
+.crm-whatsapp-bot__message {
+    margin-bottom: 10px;
+    padding: 8px 12px;
+    border-radius: 7px 7px 7px 0;
+    font-size: 14px;
+    line-height: 1.3;
+    max-width: 80%;
+    word-wrap: break-word;
+}
+
+/* Estilos para el contenedor de la imagen y el caption */
+.crm-whatsapp-bot__message-container {
+    max-width: 50%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Estilos para las imágenes, videos y audios */
+.crm-whatsapp-bot__message-media {
+    max-width: 100%; /* Ajusta el ancho máximo al 100% del contenedor */
+    height: auto; /* Permite que la altura se ajuste proporcionalmente */
+}
+
+/* Estilos para el caption de la imagen */
+.crm-whatsapp-bot__message-caption {
+    font-size: 12px;
+    color: #666;
+    margin-top: 5px;
+}
+
+/* Estilos para los mensajes recibidos */
+.crm-whatsapp-bot__message--received {
+    background-color: #fff;
+    align-self: flex-start;
+}
+
+/* Estilos para los mensajes enviados */
+.crm-whatsapp-bot__message--sent {
+    background-color: #DCF8C6;
+    align-self: flex-end;
+    border-radius: 7px 7px 0 7px;
+}
+
+/* Estilos para el footer del chat */
+.crm-whatsapp-bot__chat-footer {
+    flex-shrink: 0;
+    background-color: #f0f2f5;
+    border-top: 1px solid #e0e0e0;
+    padding: 0 10px;
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.crm-whatsapp-bot__chat-input {
+    flex-grow: 1;
+    padding: 8px;
+    border: 1px solid #e0e0e0;
+    border-radius: 20px;
+    box-sizing: border-box;
+    margin: 5px;
+    resize: vertical;
+    overflow: auto;
+    height: 40px;
+    /* min-height: 20px;
+    max-height: 200px; */
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+
+
+.crm-whatsapp-bot__chat-footer {
+    flex-shrink: 0;
+    background-color: #f0f2f5;
+    border: 1px solid #e0e0e0;
+    padding: 0 10px;
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-menu {
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    padding: 8px 0;
+    z-index: 1;
+    display: none;
+}
+
+.dropdown-item {
+    color: black;
+    padding: 8px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+.dropdown-item:hover {
+    background-color: #ddd;
+}
+
+.show {
+    display: block;
+}
+
+.crm-whatsapp-bot__chat-media {
+    padding: 8px 15px;
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+.crm-whatsapp-bot__chat-media:hover {
+    background-color: #5a6268;
+}
+
+.crm-whatsapp-bot__new-chat {
+    padding: 10px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.crm-whatsapp-bot__new-chat-input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #e0e0e0;
+    border-radius: 20px;
+    box-sizing: border-box;
+    margin-bottom: 5px;
+}
+
+.iti {
+    width: 100%; /* Agregado ancho al contenedor */
+}
+
+.crm-whatsapp-bot__new-chat-start {
+    padding: 8px 15px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+.crm-whatsapp-bot__new-chat-start:hover {
+    background-color: #0056b3;
+}
