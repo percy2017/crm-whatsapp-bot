@@ -17,7 +17,7 @@ function crm_whatsapp_bot_webhook_handler( WP_REST_Request $request ) {
     $data = $request->get_json_params();
 
     // Registrar los datos recibidos
-    // error_log( 'Webhook recibido - Datos JSON: ' . json_encode( $data ) );
+    error_log( 'Webhook recibido - Datos JSON: ' . json_encode( $data ) );
 
     // mostrando datos relevante
     error_log('message_id_wa: ' . sanitize_text_field($data['data']['key']['id'] ?? ''));
@@ -26,6 +26,7 @@ function crm_whatsapp_bot_webhook_handler( WP_REST_Request $request ) {
     error_log('extendedTextMessage: ' . json_encode(isset($data['data']['message']['extendedTextMessage']['text']) ? $data['data']['message']['extendedTextMessage']['text'] : null));
     error_log('imageMessage: ' . json_encode(isset($data['data']['message']['imageMessage']['caption']) ? $data['data']['message']['imageMessage']['caption'] : null));
     error_log('videoMessage: ' . json_encode(isset($data['data']['message']['videoMessage']['caption']) ? $data['data']['message']['videoMessage']['caption'] : null));
+    error_log('reactionMessage: ' . json_encode(isset($data['data']['message']['reactionMessage']['text']) ? $data['data']['message']['reactionMessage']['text'] : null));
     
     // Extraer Contenido del Mensaje
     $message_id_wa = sanitize_text_field($data['data']['key']['id'] ?? '');
@@ -46,6 +47,10 @@ function crm_whatsapp_bot_webhook_handler( WP_REST_Request $request ) {
          $message_text = $message_info['conversation'];
     } elseif (isset($message_info['extendedTextMessage']['text'])) {
          $message_text = $message_info['extendedTextMessage']['text'];
+    } elseif (isset($message_info['reactionMessage']['text'])) {
+         $message_text = $message_info['reactionMessage']['text'];
+    } elseif (isset($message_info['locationMessage'])) {
+         $message_text = $message_info['locationMessage']['name'].' | '.$message_info['locationMessage']['address'].' <br> Coordenadas: '.$message_info['locationMessage']['degreesLatitude'].', '.$message_info['locationMessage']['degreesLongitude'];
     } else {
         if (isset($message_info['imageMessage'])) {
             $message_text = $message_info['imageMessage']['caption'] ?? null;
@@ -153,7 +158,6 @@ function crm_whatsapp_bot_get_data( WP_REST_Request $request ) {
         $chat_data = array();
 
         foreach ( $users as $user ) {
-            // $remote_jid = str_replace( '_' . get_user_meta( $user->ID, 'crm_instance', true ), '@s.whatsapp.net', $user->user_login );
             $avatar_id = get_user_meta( $user->ID, 'wp_user_avatar', true );
             $avatar_url = wp_get_attachment_image_src( $avatar_id, 'thumbnail' );
 
@@ -176,16 +180,23 @@ function crm_whatsapp_bot_get_data( WP_REST_Request $request ) {
         return $chat_data;
     } elseif ( $type === 'get_history' ) {
         $user_id = $request->get_param( 'user_id' );
+        $instance = $request->get_param( 'instance' );
 
         $args = array(
             'post_type' => 'crm-whatsapp-bot',
             'posts_per_page' => -1,
             'meta_query' => array(
+                'relation' => 'AND',
                 array(
                     'key' => 'user_id',
                     'value' => $user_id,
                     'compare' => '=',
-                )
+                ),
+                array(
+                    'key' => 'instance',
+                    'value' => $instance,
+                    'compare' => '=',
+                ),
             ),
             'orderby' => 'modified',
             'order' => 'ASC'

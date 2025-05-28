@@ -45,9 +45,9 @@ jQuery(document).ready(function($) {
     }
 
     // Function to load chat history
-    function loadChatHistory(userId) {
+    function loadChatHistory(userId, instance) {
         $.ajax({
-            url: `/wp-json/crm-whatsapp-bot/v1/get_data?type=get_history&user_id=${userId}`,
+            url: `/wp-json/crm-whatsapp-bot/v1/get_data?type=get_history&user_id=${userId}&instance=${instance}`,
             method: 'GET',
             success: function(data) {
                 // console.log(data)
@@ -175,8 +175,9 @@ jQuery(document).ready(function($) {
         const userId = $(this).data('user-id');
         const userName = $(this).find('.crm-whatsapp-bot__chat-name').text();
         const userPicture = $(this).find('.crm-whatsapp-bot__chat-avatar img').attr('src');
-
+        const instance = $('.crm-whatsapp-bot__chat-list li.active').find('.crm-whatsapp-bot__chat-instance').text();
         console.log('[CRM] Clicked on chat with userId:', userId);
+        console.log('[CRM] Clicked on chat with instance:', instance);
 
         // Update chat header
         $('.crm-whatsapp-bot__chat-header .crm-whatsapp-bot__chat-name').text(userName);
@@ -186,7 +187,7 @@ jQuery(document).ready(function($) {
         $('.crm-whatsapp-bot__chat-body').empty();
 
         // Load chat history
-        loadChatHistory(userId);
+        loadChatHistory(userId, instance);
         $('.crm-whatsapp-bot__chat-data').hide()
         mediaId = null
         $('.crm-whatsapp-bot__chat-input').val('')
@@ -206,6 +207,7 @@ jQuery(document).ready(function($) {
             method: 'GET',
             success: function(data) {
                 // Insertar la información del contacto en el sidebar derecho
+                $('.crm-whatsapp-bot__chat-data .crm-whatsapp-bot__chat-data-avatar').prop('src', data.picture);
                 $('.crm-whatsapp-bot__chat-data .crm-whatsapp-bot__chat-data-name').val(data.name);
                 $('.crm-whatsapp-bot__chat-data .crm-whatsapp-bot__chat-data-email').val(data.email);
                 $('.crm-whatsapp-bot__chat-data .crm-whatsapp-bot__chat-data-phone').val(data.billing_phone);
@@ -246,7 +248,7 @@ jQuery(document).ready(function($) {
         let role = $('.crm-whatsapp-bot__chat-data .crm-whatsapp-bot__chat-data-role').val();
         let crm_etiqueta = $('.crm-whatsapp-bot__chat-data .crm-whatsapp-bot__chat-data-etiqueta').val();
         let instance = $('.crm-whatsapp-bot__chat-data .crm-whatsapp-bot__chat-data-instance').val();
-        console.log(instance)
+        // console.log(instance)
         $.ajax({
             url: `/wp-json/crm-whatsapp-bot/v1/get_data?type=update_user`,
             method: 'GET',

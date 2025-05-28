@@ -62,8 +62,11 @@ function crm_whatsapp_bot_render_ui() {
          </div>
 
         <div class="crm-whatsapp-bot__sidebar crm-whatsapp-bot__sidebar--right crm-whatsapp-bot__chat-data">
-            <div class="crm-whatsapp-bot__chat-header">
-                <h2>Info de Contacto</h2>
+           
+            <h2>Info de Contacto</h2>
+            <hr>
+            <div class="crm-whatsapp-bot__chat-data-item">
+                <img class="crm-whatsapp-bot__chat-data-avatar" src="" alt="">
             </div>
             <div class="crm-whatsapp-bot__chat-data-item">
                 <label>Nombre:</label>
